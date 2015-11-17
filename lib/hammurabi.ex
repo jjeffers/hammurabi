@@ -2,8 +2,6 @@ defmodule Hammurabi do
 
   def main(args) do
     :random.seed(:erlang.now)
-    args
-      |> parse_args
     simulate_years(10)
   end
 
