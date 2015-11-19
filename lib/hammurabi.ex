@@ -57,13 +57,11 @@ defmodule Hammurabi do
   end
 
   def simulate_years(current, remaining_number_of_years, state) do
-    IO.puts "In year #{current} our kingdom had "
-    IO.puts "#{state[:acres]} acres and "
-    IO.puts "#{state[:population]} subjects and "
-    IO.puts "#{state[:bushels_of_grain]} bushels of grain"
 
-    for_food = IO.gets("How many bushels of grain shall we feed to the people? (0-#{state[:bushels_of_grain]}) ") |> String.strip |> String.to_integer()
-    for_planting = IO.gets("How many bushels of grain shall we plant? (0-#{state[:bushels_of_grain] - for_food}) ") |> String.strip |> String.to_integer()
+    display_state(current, state)
+
+    for_food = ask_for_grain_to_feed(state[:bushels_of_grain])
+    for_planting = ask_for_grain_to_plant(state[:bushels_of_grain]-for_food)
 
     IO.puts "We granted #{for_food} bushels of grain to our subjects to eat"
     IO.puts "We planted #{for_planting} bushels of grain for next year"
@@ -74,5 +72,29 @@ defmodule Hammurabi do
         acres: state[:acres],
         bushels_of_grain: harvest(state[:acres], acres_harvested(for_planting), generate_yield_per_acre()) })
 
+  end
+
+  def display_state(current, state) do
+    IO.puts "In the year #{current} of your reign our kingdom had "
+    IO.puts "#{state[:acres]} acres and "
+    IO.puts "#{state[:population]} subjects and "
+    IO.puts "#{state[:bushels_of_grain]} bushels of grain"
+  end
+
+  def ask_for_an_amount(miniumum, maximum, question) do
+    case IO.gets(question) |> String.strip |> String.to_integer() do
+      x when x < 0 or x > maximum -> ask_for_an_amount(miniumum, maximum, question)
+      x -> x
+    end
+  end
+
+  def ask_for_grain_to_plant(available_bushels_for_feeding) do
+    ask_for_an_amount(0, available_bushels_for_feeding,
+     "How many bushels of grain shall we plant? (0-#{available_bushels_for_feeding}) ")
+  end
+
+  def ask_for_grain_to_feed(available_bushels_for_planting) do
+    ask_for_an_amount(0, available_bushels_for_planting,
+      "How many bushels of grain shall we feed to the people? (0-#{available_bushels_for_planting}) ")
   end
 end
