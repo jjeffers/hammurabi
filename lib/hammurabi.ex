@@ -62,6 +62,8 @@ defmodule Hammurabi do
 
     for_food = ask_for_grain_to_feed(state[:bushels_of_grain])
     for_planting = ask_for_grain_to_plant(state[:bushels_of_grain]-for_food)
+    leftover = state[:bushels_of_grain] - (for_food + for_planting)
+
     yield = state[:current_yield]
 
     IO.puts "We granted #{for_food} bushels of grain to our subjects to eat"
@@ -71,12 +73,14 @@ defmodule Hammurabi do
     simulate_years(current+1, remaining_number_of_years-1,
       %{ population: simulate_one_year(state[:population], for_food),
         acres: state[:acres],
-        bushels_of_grain: harvest(state[:acres], acres_harvested(for_planting), generate_yield_per_acre(yield)) })
+        bushels_of_grain: harvest(state[:acres], acres_harvested(for_planting), generate_yield_per_acre(yield)) +
+          leftover})
 
   end
 
   def display_state(current, state) do
-    IO.puts "In the year #{current} of your reign our kingdom had "
+    IO.puts "\nOH GREAT RULER, I get to report that"
+    IO.puts "in the year #{current} of your reign our kingdom had "
     IO.puts "#{state[:acres]} acres and "
     IO.puts "#{state[:population]} subjects and "
     IO.puts "#{state[:bushels_of_grain]} bushels of grain"
