@@ -36,13 +36,9 @@ defmodule Hammurabi do
       acres_harvested*yield_per_acre
     end
 
-  def generate_yield_per_acre do
-    Enum.random(2..6)
-  end
-
   def simulate_years(number_of_years) when number_of_years > 0 do
     simulate_years(1, number_of_years,
-      %{ acres: 1000, population: 100, bushels_of_grain: 4000 })
+      %{ acres: 1000, population: 100, bushels_of_grain: 4000, crop_yield: 2 })
   end
 
   def simulate_years(_current, 0, state) do
@@ -56,12 +52,17 @@ defmodule Hammurabi do
     IO.puts "Our last subject starved to death!"
   end
 
+  defp generate_yield_per_acre(current_yield) do
+    CropYield.next_yield(current_yield)
+  end
+
   def simulate_years(current, remaining_number_of_years, state) do
 
     display_state(current, state)
 
     for_food = ask_for_grain_to_feed(state[:bushels_of_grain])
     for_planting = ask_for_grain_to_plant(state[:bushels_of_grain]-for_food)
+    yield = state[:current_yield]
 
     IO.puts "We granted #{for_food} bushels of grain to our subjects to eat"
     IO.puts "We planted #{for_planting} bushels of grain for next year"
@@ -70,7 +71,7 @@ defmodule Hammurabi do
     simulate_years(current+1, remaining_number_of_years-1,
       %{ population: simulate_one_year(state[:population], for_food),
         acres: state[:acres],
-        bushels_of_grain: harvest(state[:acres], acres_harvested(for_planting), generate_yield_per_acre()) })
+        bushels_of_grain: harvest(state[:acres], acres_harvested(for_planting), generate_yield_per_acre(yield)) })
 
   end
 

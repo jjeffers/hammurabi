@@ -26,7 +26,7 @@ defmodule Hammurabi.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [{:mock, "~> 0.1.1", only: :test}]
   end
 
   defp escript_config do
