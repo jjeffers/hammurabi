@@ -36,9 +36,17 @@ defmodule Hammurabi do
       acres_harvested*yield_per_acre
     end
 
+  defp generate_yield_per_acre(current_yield) do
+    CropYield.next_yield(current_yield)
+  end
+
   def simulate_years(number_of_years) when number_of_years > 0 do
     simulate_years(1, number_of_years,
-      %{ acres: 1000, population: 100, bushels_of_grain: 4000, crop_yield: 2 })
+      %{ acres: 1000, population: 100, bushels_of_grain: 4000, crop_yield: 3 })
+  end
+
+  def simulate_years(_current, 0, %{ :population => 0}) do
+    IO.puts "Our last subject starved to death!"
   end
 
   def simulate_years(_current, 0, state) do
@@ -46,14 +54,6 @@ defmodule Hammurabi do
     IO.puts "#{state[:acres]} acres and "
     IO.puts "#{state[:population]} subjects and "
     IO.puts "#{state[:bushels_of_grain]} bushels of grain"
-  end
-
-  def simulate_years(_current, 0, %{ :population => 0}) do
-    IO.puts "Our last subject starved to death!"
-  end
-
-  defp generate_yield_per_acre(current_yield) do
-    CropYield.next_yield(current_yield)
   end
 
   def simulate_years(current, remaining_number_of_years, state) do
@@ -64,17 +64,23 @@ defmodule Hammurabi do
     for_planting = ask_for_grain_to_plant(state[:bushels_of_grain]-for_food)
     leftover = state[:bushels_of_grain] - (for_food + for_planting)
 
-    yield = state[:current_yield]
+    yield = generate_yield_per_acre(state[:crop_yield])
 
     IO.puts "We granted #{for_food} bushels of grain to our subjects to eat"
-    IO.puts "We planted #{for_planting} bushels of grain for next year"
+    IO.puts "We planted #{for_planting} bushels of grain for next year over #{round(for_planting/2)} acres"
+    IO.puts "We expect to reap #{round(for_planting/2)*yield} bushels of grain"
     IO.puts "\n"
 
+    new_population = simulate_one_year(state[:population], for_food)
+    new_bushels = harvest(state[:acres], acres_harvested(for_planting), yield) +
+      leftover
+
+
     simulate_years(current+1, remaining_number_of_years-1,
-      %{ population: simulate_one_year(state[:population], for_food),
+      %{ population: new_population,
         acres: state[:acres],
-        bushels_of_grain: harvest(state[:acres], acres_harvested(for_planting), generate_yield_per_acre(yield)) +
-          leftover})
+        bushels_of_grain: new_bushels,
+        crop_yield: yield })
 
   end
 
